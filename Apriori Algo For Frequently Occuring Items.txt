@@ -1,0 +1,37 @@
+Apply a-priori algorithm to find frequently occurring items from given data and generate strong association rules using support and confidence thresholds.
+
+pip install apyori
+
+import pandas as pd
+
+
+data = pd.read_csv('Market_Basket_Optimisation.csv', header=None)
+
+# Convert the dataset into a list of transactions
+transactions = []
+for i in range(len(data)):
+    transaction = [str(data.values[i, j]) for j in range(data.shape[1]) if str(data.values[i, j]) != 'nan']
+    transactions.append(transaction)
+
+# Display first 5 transactions for verification
+print(transactions[:5])
+
+
+
+from mlxtend.preprocessing import TransactionEncoder
+from mlxtend.frequent_patterns import apriori, association_rules
+
+te = TransactionEncoder()
+te_ary = te.fit(transactions).transform(transactions)
+df = pd.DataFrame(te_ary, columns=te.columns_)
+frequent_itemsets = apriori(df, min_support=0.01, use_colnames=True, max_len=2)
+if frequent_itemsets.empty:
+    print("No frequent itemsets found. Try lowering the min_support or adjusting the parameters.")
+else:
+    rules = association_rules(frequent_itemsets, metric="confidence", min_threshold=0.2)
+    print(frequent_itemsets.head())
+    print(rules.head())
+
+frequent_itemsets = apriori(df, min_support=0.07, use_colnames=True, max_len=5)
+print("\nFrequent itemsets:")
+print(frequent_itemsets.head())
